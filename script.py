@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import signal
+import serial
 
 fifo_file = "/tmp/mplayer.fifo"
 movie = sys.argv[1] # TODO movie list
@@ -14,19 +15,27 @@ def signal_handler(signal, frame):
     print '\nmplayer killed.'
     sys.exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
-os.mkfifo(fifo_file)
+ser = serial.Serial('/dev/ttyACM0', 9600);
+ser.open()
+ser.isOpen()
 
-command = "mplayer -slave -input file=" + fifo_file + " " # TODO use -fs for full screen
+command = "mplayer -fs -slave -input file=" + fifo_file + " "
 os.system( command + movie + "&")
 
-step = 0.05
-speed = 1
+COEF=0.9
+oldspeed=0
+MIN_DIF=0.1
+
 while True:
-    print "\n => " + str(speed) + "\n"
-    os.system("echo speed_set " + str(speed) + " > " + fifo_file)
-    if (speed <= 0.5): step = abs(step)
-    elif (speed >= 2): step = -abs(step)
-    speed += step
-    time.sleep(0.1)
+    speed = int(ser.readline()) / 877.0 + 0.2
+    speed = speed*COEF + (1-COEF)*oldspeed
+#   print "(speed ", speed, ") (old:", oldspeed
+#   print "diff ", (speed-oldspeed)
+
+    if (abs(speed-oldspeed) > MIN_DIF):
+        os.system("echo speed_set "
+                  + str(speed) + " > " + fifo_file)
+
+    oldspeed = speed
+    time.sleep(0.5)
 
