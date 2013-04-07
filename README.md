@@ -4,7 +4,7 @@ Welcome to the CycloKino project !
 Purpose: control the speed of a video with the speed of a bike.
 Note: the bike generates enough energy for an EEE PC + LED video projector.
 This project is a part of the CarAmazAndes project:
-[www.marcho.net/amazandes.pdf](www.marcho.net/amazandes.pdf)
+[www.marcho.net](http://www.marcho.net)
 
 
 Schematic of the system:
