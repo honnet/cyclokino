@@ -9,6 +9,7 @@ fifo_file = "/tmp/mplayer.fifo"
 movie = sys.argv[1] # TODO movie list
 
 def signal_handler(signal, frame):
+    print 'Exiting...'
     os.remove(fifo_file)
     print '\nFIFO file removed.'
     os.system("killall mplayer")
@@ -31,8 +32,7 @@ OFFSET=0.2
 
 while True:
     speed = int(ser.readline()) / MAX_VAL + OFFSET
-#   print "(speed ", speed, ") (old:", oldspeed
-#   print "diff ", (speed-oldspeed)
+#   print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
 
     if (abs(speed-oldspeed) > MIN_DIF):
         os.system("echo speed_set "
