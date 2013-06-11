@@ -21,13 +21,13 @@ ser.isOpen()
 command = "mplayer -fs -slave -input file=" + fifo_file + " "
 os.system( command + movie + "&")
 
-COEF=0.9
 oldspeed=0
 MIN_DIF=0.1
+MAX_VAL=877.0
+OFFSET=0.2
 
 while True:
-    speed = int(ser.readline()) / 877.0 + 0.2
-    speed = speed*COEF + (1-COEF)*oldspeed
+    speed = int(ser.readline()) / MAX_VAL + OFFSET
 #   print "(speed ", speed, ") (old:", oldspeed
 #   print "diff ", (speed-oldspeed)
 
