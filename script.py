@@ -16,7 +16,6 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 ser = serial.Serial('/dev/ttyACM0', 9600);
-ser.open()
 ser.isOpen()
 
 command = "mplayer -fs -slave -input file=" + fifo_file + " "
