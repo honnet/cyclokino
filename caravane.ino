@@ -15,5 +15,5 @@ void loop() {
   oldValue = sensorValue;
 
   digitalWrite(11, led = !led);
-  delay(500);
+  delay(300);
 }

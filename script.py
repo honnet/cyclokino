@@ -39,5 +39,5 @@ while True:
                   + str(speed) + " > " + fifo_file)
 
     oldspeed = speed
-    time.sleep(0.5)
+    time.sleep(0.3)
 
