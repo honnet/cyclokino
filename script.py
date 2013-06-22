@@ -27,7 +27,7 @@ os.system( command + movie + "&")
 
 oldspeed=0
 MIN_DIF=0.1
-MAX_VAL=877.0
+MAX_VAL=120.0 # to use with the bubble machine (use 930.0 on 24V)
 OFFSET=0.2
 
 while True:
