@@ -32,6 +32,7 @@ OFFSET=0.2
 
 while True:
     speed = int(ser.readline()) / MAX_VAL + OFFSET
+    speed = int(speed*20) / 20.0 # round to 5%
 #   print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
 
     if (abs(speed-oldspeed) > MIN_DIF):
