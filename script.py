@@ -22,7 +22,7 @@ ser.isOpen()
 if not os.path.exists(fifo_file):
     os.mkfifo(fifo_file)
 
-command = "mplayer -fs -slave -input file=" + fifo_file + " "
+command = "mplayer -msglevel all=0 -fs -slave -input file=" + fifo_file + " "
 os.system( command + movie + "&")
 
 oldspeed=0
