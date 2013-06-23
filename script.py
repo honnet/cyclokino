@@ -31,7 +31,9 @@ MAX_VAL=120.0 # to use with the bubble machine (use 930.0 on 24V)
 OFFSET=0.2
 
 while True:
-    speed = int(ser.readline()) / MAX_VAL + OFFSET
+    vin = ser.readline()
+#   print "vin = ", vin
+    speed = int(vin) / MAX_VAL + OFFSET
     speed = int(speed*20) / 20.0 # round to 5%
 #   print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
 
