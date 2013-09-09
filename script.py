@@ -5,7 +5,9 @@ import time
 import signal
 import serial
 
-fifo_file = "/tmp/mplayer.fifo"
+# where the playback speed is requested
+host = "localhost"
+port = "3333"
 movie = sys.argv[1] # TODO movie list
 
 def signal_handler(signal, frame):
@@ -22,8 +24,10 @@ ser.isOpen()
 if not os.path.exists(fifo_file):
     os.mkfifo(fifo_file)
 
-command = "mplayer -msglevel all=0 -fs -slave -input file=" + fifo_file + " "
-os.system( command + movie + "&")
+command = "cvlc --extraintf rc --rc-host "
+command = command + host + ":" + port + " " + movie + "&"
+os.system(command)
+print command
 
 oldspeed=0
 MIN_DIF=0.1
@@ -38,8 +42,9 @@ while True:
 #   print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
 
     if (abs(speed-oldspeed) > MIN_DIF):
-        os.system("echo speed_set "
-                  + str(speed) + " > " + fifo_file)
+        command = "echo rate " + str(speed) + " | telnet " + host + " " + port + "&"
+        os.system(command)
+        print command
 
     oldspeed = speed
     time.sleep(0.3)
