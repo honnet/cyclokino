@@ -1,10 +1,11 @@
 Welcome to the CycloKino project !
 ==================================
 
-This is an in-progress repository for a cyclo-powered, interactive and evolving mobile gallery/cinema.
-It is developped as a part of the CarAmazAndes project: [www.marcho.net](http://www.marcho.net)
+This repository contains the poof of concept of an interactive and cyclo-powered mobile cinema.
+It is developped as a part of the CarAmazAndes project: www.marcho.net
 
-Purpose of the current code: control the speed of a video with the speed of a bike.
+Purpose of the current code: control the speed of a video with the speed of a bike, here is a video:
+www.vimeo.com/69235525
 
 Note: with our "dynamo" system, a bike generates just enough energy for an EEE PC + an LED video projector.
 
