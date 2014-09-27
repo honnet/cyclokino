@@ -2,45 +2,112 @@
 import os
 import sys
 import time
+import glob
 import signal
 import serial
 
-fifo_file = "/tmp/mplayer.fifo"
-movie = sys.argv[1] # TODO movie list
+DEBUG_PRINT = 1
 
+FILMS_DIR =  "cyclo_films"
+FILMS_PATH = "" # "/media/cyclo/*/"     # TODO: test USB drive path
+FILMS = FILMS_PATH + FILMS_DIR + "/*"   # TODO: test files / folders
+
+FIFO_FILE = "/tmp/mplayer.fifo"
+
+################################# funktions #######################################
+def welcome():
+    # TODO: test number of files
+    print " *** Movies folder: " + FILMS_DIR + " (at the flash drive root)\n"
+    print " *** Press ctrl-c to stop.\n"
+    signal.signal(signal.SIGINT, signal_handler)
+    time.sleep(1)
+
+# allow clean exit with ctrl-c
 def signal_handler(signal, frame):
-    print 'Exiting...'
-    os.remove(fifo_file)
-    print '\nFIFO file removed.'
-    os.system("killall mplayer")
-    print '\nmplayer killed.'
+    print "Ciao!"
+    cmd = "killall -9 mplayer &> /dev/null && true"
+    execute(cmd)
+#   os.remove(FIFO_FILE)
     sys.exit(0)
 
-ser = serial.Serial('/dev/ttyACM0', 9600);
-ser.isOpen()
+def serial_init():
+    devices = glob.glob("/dev/ttyACM*")
+    ser = serial.Serial(devices[0], 115200)
+    success = ser.isOpen()
+    if not success:
+        print "\n!!! Error: serial device not found !!!"
+        sys.exit(-1)
+    return ser
 
-if not os.path.exists(fifo_file):
-    os.mkfifo(fifo_file)
+# execute a command (if in debug mode, print it before)
+def execute(cmd):
+    err = os.system(cmd)
+    if DEBUG_PRINT:
+        print "command: " + cmd
+        if err:
+            print "!!! ERROR !!! (code = " + str(err) + ") \n\n"
 
-command = "mplayer -msglevel all=0 -fs -slave -input file=" + fifo_file + " "
-os.system( command + movie + "&")
+# return True if vlc is running by checking in process list
+def isRunning():
+    proc_list = os.popen("ps -Af").read()      # look for an mplayer process...
+    return ("mplayer" and "fifo" in proc_list) # ...with the right args.
 
-oldspeed=0
-MIN_DIF=0.1
-MAX_VAL=120.0 # to use with the bubble machine (use 930.0 on 24V)
-OFFSET=0.2
+# playback speed modulation request
+def set_speed(speed):
+    cmd = "echo speed_set " + str(speed) + " > " + FIFO_FILE
+    execute(cmd)
 
-while True:
+# start playing at a specified speed (list loop, full screen, remote mode)
+def play():
+    if not os.path.exists(FIFO_FILE):
+        os.mkfifo(FIFO_FILE)
+    cmd = "mplayer -msglevel all=-1 -fs -slave -input file=" + FIFO_FILE + " " + FILMS + " &"
+    execute(cmd)
+
+def constrain(speed, min_s, max_s):
+    if speed < min_s:
+        speed = min_s
+    elif speed > max_s:
+        speed = max_s
+    return speed
+
+def get_speed(ser):
+    MAX_VAL = 120.0  # TODO: recheck
+    OFFSET  = 0.2
+
     vin = ser.readline()
-#   print "vin = ", vin
+    ser.flush() # TODO to avoid potential overflow ?
+
+    if DEBUG_PRINT:
+        print "\nvin = ", int(vin)
+
     speed = int(vin) / MAX_VAL + OFFSET
-    speed = int(speed*20) / 20.0 # round to 5%
-#   print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
+    return int(speed*20) / 20.0 # round to 5%
 
-    if (abs(speed-oldspeed) > MIN_DIF):
-        os.system("echo speed_set "
-                  + str(speed) + " > " + fifo_file)
 
-    oldspeed = speed
-    time.sleep(0.3)
+#################################### main #########################################
+def main():
+    MIN_DIF  = 0.1
+    oldspeed = 0
+
+    welcome()
+    ser = serial_init()
+
+    while True: # wait for a ctrl-c interrupt
+        speed = get_speed(ser)
+        speed = constrain(speed, 0.5, 2)
+
+        if DEBUG_PRINT:
+            print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
+
+        if (abs(speed-oldspeed) > MIN_DIF):
+            if not isRunning():
+                play()
+            else:
+                set_speed(speed)
+            oldspeed = speed
+        time.sleep(0.3)
+
+if __name__ == "__main__":
+    main()
 

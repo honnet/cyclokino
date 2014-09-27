@@ -4,7 +4,7 @@ const float COEF = 0.9;
 
 void setup() {
   pinMode(11, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
