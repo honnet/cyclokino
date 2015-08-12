@@ -11,6 +11,7 @@ DEBUG_PRINT = 1
 FILMS_DIR =  "cyclo_films"
 FILMS_PATH = "" # "/media/cyclo/*/"     # TODO: test USB drive path
 FILMS = FILMS_PATH + FILMS_DIR + "/*"   # TODO: test files / folders
+# stackoverflow.com/questions/2632205/count-the-number-of-files-in-a-directory-using-python
 
 FIFO_FILE = "/tmp/mplayer.fifo"
 
@@ -25,6 +26,7 @@ def welcome():
 # allow clean exit with ctrl-c
 def signal_handler(signal, frame):
     print "Ciao!"
+    # TODO: use os.kill(pid, sig)¶
     cmd = "killall -9 mplayer &> /dev/null && true"
     execute(cmd)
 #   os.remove(FIFO_FILE)
@@ -54,6 +56,7 @@ def isRunning():
 
 # playback speed modulation request
 def set_speed(speed):
+    # TODO: use os.write() ? www.tutorialspoint.com/python/os_write.htm
     cmd = "echo speed_set " + str(speed) + " > " + FIFO_FILE
     execute(cmd)
 
