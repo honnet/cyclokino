@@ -6,11 +6,10 @@ import glob
 import signal
 import serial
 
-DEBUG_PRINT = 1
+DEBUG_PRINT = 0
 
-FILMS_DIR =  "cyclo_films"
-FILMS_PATH = "" # "/media/cyclo/*/"     # TODO: test USB drive path
-FILMS = FILMS_PATH + FILMS_DIR + "/*"   # TODO: test files / folders
+FILMS_PATH =  "cyclo_films"  # "/media/cyclo/*/"     # TODO: test USB drive path
+FILMS = FILMS_PATH + "/*"
 # stackoverflow.com/questions/2632205/count-the-number-of-files-in-a-directory-using-python
 
 FIFO_FILE = "/tmp/mplayer.fifo"
@@ -18,22 +17,24 @@ FIFO_FILE = "/tmp/mplayer.fifo"
 ################################# funktions #######################################
 def welcome():
     # TODO: test number of files
-    print " *** Movies folder: " + FILMS_DIR + " (at the flash drive root)\n"
-    print " *** Press ctrl-c to stop.\n"
+    print
+    print " >>> Movies folder: " + FILMS_PATH + "\n"
+    print " >>> Press ctrl-c to stop.\n"
     signal.signal(signal.SIGINT, signal_handler)
-    time.sleep(1)
 
 # allow clean exit with ctrl-c
 def signal_handler(signal, frame):
-    print "Ciao!"
-    # TODO: use os.kill(pid, sig)¶
+    print "\n\nCiao!"
+    # TODO: use os.kill(pid, sig)
     cmd = "killall -9 mplayer &> /dev/null && true"
     execute(cmd)
-#   os.remove(FIFO_FILE)
+    os.remove(FIFO_FILE)
     sys.exit(0)
 
 def serial_init():
     devices = glob.glob("/dev/ttyACM*")
+    if DEBUG_PRINT:
+        print devices
     ser = serial.Serial(devices[0], 115200)
     success = ser.isOpen()
     if not success:
@@ -64,7 +65,7 @@ def set_speed(speed):
 def play():
     if not os.path.exists(FIFO_FILE):
         os.mkfifo(FIFO_FILE)
-    cmd = "mplayer -msglevel all=-1 -fs -slave -input file=" + FIFO_FILE + " " + FILMS + " &"
+    cmd = "mplayer -msglevel all=-1 -fs -slave -input file=" + FIFO_FILE + " " + FILMS + " 2> /dev/null &"
     execute(cmd)
 
 def constrain(speed, min_s, max_s):
@@ -75,7 +76,7 @@ def constrain(speed, min_s, max_s):
     return speed
 
 def get_speed(ser):
-    MAX_VAL = 120.0  # TODO: recheck
+    MAX_VAL = 300.0  # TODO: recheck
     OFFSET  = 0.2
 
     vin = ser.readline()

@@ -29,6 +29,16 @@ We currently use an Arduino compatible board called [Teensy](www.pjrc.com/teensy
 This board sends the measures to a python program running in an EEE PC.
 This python program plays a video (using mplayer) at a speed that depends on the measures.
 
+
+Usage:
+======
+
+Adjust the maximum received value from the bike (`MAX_VAL`).
+Edit the path where you placed your films (`FILMS_PATH`) and run:
+
+    python script.py
+
+
 Contact:
 ========
 For any question, feel free to contact me: drix(at)TangibleDisplay.com
