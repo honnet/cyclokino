@@ -6,7 +6,10 @@ import glob
 import signal
 import serial
 
-DEBUG_PRINT = 0
+MAX_VAL = 750.0  # ~25V
+OFFSET  = 0.2
+
+DEBUG_PRINT = 1
 
 FILMS_PATH =  "cyclo_films"  # "/media/cyclo/*/"     # TODO: test USB drive path
 FILMS = FILMS_PATH + "/*"
@@ -53,7 +56,10 @@ def execute(cmd):
 # return True if vlc is running by checking in process list
 def isRunning():
     proc_list = os.popen("ps -Af").read()      # look for an mplayer process...
-    return ("mplayer" and "fifo" in proc_list) # ...with the right args.
+    mplayer_found = ("mplayer" and "fifo" in proc_list) # ...with the right args.
+    if DEBUG_PRINT:
+        print "isRunning(): " + str(mplayer_found)
+    return mplayer_found
 
 # playback speed modulation request
 def set_speed(speed):
@@ -64,7 +70,9 @@ def set_speed(speed):
 # start playing at a specified speed (list loop, full screen, remote mode)
 def play():
     if not os.path.exists(FIFO_FILE):
-        os.mkfifo(FIFO_FILE)
+        ret = os.mkfifo(FIFO_FILE)
+        if DEBUG_PRINT:
+            print "play(): " + str(ret)
     cmd = "mplayer -msglevel all=-1 -fs -slave -input file=" + FIFO_FILE + " " + FILMS + " 2> /dev/null &"
     execute(cmd)
 
@@ -76,9 +84,6 @@ def constrain(speed, min_s, max_s):
     return speed
 
 def get_speed(ser):
-    MAX_VAL = 300.0  # TODO: recheck
-    OFFSET  = 0.2
-
     vin = ser.readline()
     ser.flush() # TODO to avoid potential overflow ?
 
@@ -97,18 +102,19 @@ def main():
     welcome()
     ser = serial_init()
 
+    if not isRunning():
+        play()
+    set_speed(OFFSET)
+
     while True: # wait for a ctrl-c interrupt
         speed = get_speed(ser)
-        speed = constrain(speed, 0.5, 2)
+        speed = constrain(speed, OFFSET, 2)
 
         if DEBUG_PRINT:
             print "(speed:", speed, ") (old:", oldspeed, ") => diff: ", (speed-oldspeed)
 
         if (abs(speed-oldspeed) > MIN_DIF):
-            if not isRunning():
-                play()
-            else:
-                set_speed(speed)
+            set_speed(speed)
             oldspeed = speed
         time.sleep(0.3)
 
