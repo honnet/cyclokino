@@ -41,5 +41,4 @@ Edit the path where you placed your films (`FILMS_PATH`) and run:
 
 Contact:
 ========
-For any question, feel free to contact me: drix(at)TangibleDisplay.com
-
+For any question, feel free to contact me: Contact(at)Honnet.eu
